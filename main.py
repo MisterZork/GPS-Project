@@ -141,6 +141,7 @@ if __name__ == "__main__":
              print(f"| L'angle entre le satellite {new_order[i][0]} et le satellite {new_order[i][1]} est : "
                    f"{round(rep, 6) if rep > 15 else "Trop petit"} |")
     print(texte_q2.center(90))
-    print(np_calculate_matrix(sat_ID, nb_sat, sat_data))
+    excel_list = np_calculate_matrix(sat_ID, nb_sat, sat_data)
+    print(f"Les coordonnées X, Y et Z où se trouve le GPS sont : {np.round(excel_list[0:3], 6)} (en mètres)")
     print(calculate_desync.__doc__.center(90))
 
