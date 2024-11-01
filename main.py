@@ -87,19 +87,19 @@ def np_calculate_matrix(order, number, data):
 
     new_matrix = np.array(
                 [[-2 * matrix[0][2], -2 * matrix[0][3], -2 * matrix[0][4],
-                  2 * (pow(VITESSE_LUMIERE, 2) - (matrix[0][1] - matrix[0][0])), 1],
+                  2 * (pow(VITESSE_LUMIERE, 2) * (matrix[0][1] - matrix[0][0])), 1],
                  [-2 * matrix[1][2], -2 * matrix[1][3], -2 * matrix[1][4],
-                  2 * (pow(VITESSE_LUMIERE, 2) - (matrix[1][1] - matrix[1][0])), 1],
+                  2 * (pow(VITESSE_LUMIERE, 2) * (matrix[1][1] - matrix[1][0])), 1],
                  [-2 * matrix[2][2], -2 * matrix[2][3], -2 * matrix[2][4],
-                  2 * (pow(VITESSE_LUMIERE, 2) - (matrix[2][1] - matrix[2][0])), 1],
+                  2 * (pow(VITESSE_LUMIERE, 2) * (matrix[2][1] - matrix[2][0])), 1],
                  [-2 * matrix[3][2], -2 * matrix[3][3], -2 * matrix[3][4],
-                  2 * (pow(VITESSE_LUMIERE, 2) - (matrix[3][1] - matrix[3][0])), 1],
+                  2 * (pow(VITESSE_LUMIERE, 2) * (matrix[3][1] - matrix[3][0])), 1],
                  [-2 * matrix[4][2], -2 * matrix[4][3], -2 * matrix[4][4],
-                  2 * (pow(VITESSE_LUMIERE, 2) - (matrix[4][1] - matrix[4][0])), 1]])
+                  2 * (pow(VITESSE_LUMIERE, 2) * (matrix[4][1] - matrix[4][0])), 1]])
 
     if np.linalg.det(new_matrix) == 0:
-        return print(matrix)
-    ans_list = np.transpose(np.matmul(np.linalg.inv(new_matrix), ans))
+        return quit("ERROR 5 - NO ANSWER FOUND IN MATRIX")
+    ans_list = np.transpose(np.dot(np.linalg.inv(new_matrix), ans))
     return ans_list
 
 def calculate_desync(order):
