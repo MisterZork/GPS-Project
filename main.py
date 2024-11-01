@@ -1,5 +1,5 @@
 import csv
-from math import sqrt, acos, degrees
+from math import sqrt, acos, asin, degrees
 import numpy as np
 
 VITESSE_LUMIERE = 299792458
@@ -48,16 +48,6 @@ def calculate_angle(ang1, ang2):
     answer = degrees(acos(cos))
     return answer
 
-def np_calculate_angle(matrix, id):
-    product = float(matrix[id[0], 2] * matrix[id[1], 2]
-                    + matrix[id[0], 3] * matrix[id[1], 3]
-                    + matrix[id[0], 4] * matrix[id[1], 4])
-    module_product = float(sqrt(pow(matrix[id[0], 2], 2) + pow(matrix[id[0], 3], 2) + pow(matrix[id[4], 2], 2))
-                           * sqrt(pow(matrix[id[1], 2], 2) + pow(matrix[id[1], 3], 2) + pow(matrix[id[1], 4], 2)))
-    cos = (product / module_product)
-    answer = degrees(acos(cos))
-    return answer
-
 def np_calculate_matrix(order, number, data):
     """Question 2 et 3 - Calculer, à partir de cinq satellites, la matrice du .csv contenant les réponses"""
     if number != 5:
@@ -102,13 +92,17 @@ def np_calculate_matrix(order, number, data):
     ans_list = np.transpose(np.dot(np.linalg.inv(new_matrix), ans))
     return ans_list
 
-def calculate_desync(order):
-    """Question 3 - Calculer le décalage de l'horloge récepteur des satellites"""
-    pass #TODO - Find, with the resulting matrice, where is the correct answer
-
-def calculate_coordinates_polar(order):
+def calculate_coordinates_polar(coords):
     """Question 4 - Calculer, à partir de 5 satellites, les coordonnées polaires du point GPS"""
-    pass #TODO - With The XYZ Vector, find
+    x, y, z = coords[0][0], coords[0][1], coords[0][2]
+    p = sqrt((x**2) + (y**2) + (z**2))
+    lat = degrees(asin(z / p))
+    if y >= 0:
+        long = degrees(acos(x / sqrt(x**2 + y**2)))
+    else:
+        long = degrees(-acos(x / sqrt(x**2 + y**2)))
+    h = p - RAYON_TERRE
+    return [lat, long, h]
 
 def googlemaps_finder(long, lat):
     """Question 5 - Utiliser le module googlemaps pour obtenir la description du lieu affiché"""
@@ -121,7 +115,9 @@ if __name__ == "__main__":
     sat_data = []
     sat_ID = []
     texte_q1 = f"{"-" * 30}Question 1{"-" * 30}\n Quel est l'angle entre chaque satellite ?"
-    texte_q2 = f"{"-" * 30}Question 2{"-" * 30}\n Quel sont les coordonnés affiché par le satellite ?"
+    texte_q2 = f"{"-" * 30}Question 2{"-" * 30}\n Quels sont les coordonnés affiché par le satellite ?"
+    texte_q3 = f"{"-" * 30}Question 3{"-" * 30}\n Quel est le décalage horloge du GPS ?"
+    texte_q4 = f"{"-" * 30}Question 4{"-" * 30}\n Quels sont les coordonnées polaires du GPS ?"
 
     file = str(input("What is the name of the .csv file (in the same directory as the script) \n"
                     "(Example : '28_Data') : ") + ".csv")
@@ -142,6 +138,8 @@ if __name__ == "__main__":
                    f"{round(rep, 6) if rep > 15 else "Trop petit"} |")
     print(texte_q2.center(90))
     excel_list = np_calculate_matrix(sat_ID, nb_sat, sat_data)
-    print(f"Les coordonnées X, Y et Z où se trouve le GPS sont : {np.round(excel_list[0:3], 6)} (en mètres)")
-    print(calculate_desync.__doc__.center(90))
-
+    print(f"Les coordonnées X, Y et Z où se trouve le GPS sont : {np.round(excel_list[0][0:3], 0)} (en mètres)")
+    print(texte_q3.center(90))
+    print(f"Le décalage horloge du GPS est : {np.round(excel_list[0][3], 4)} secondes")
+    print(texte_q4.center(90))
+    print(calculate_coordinates_polar(excel_list))
