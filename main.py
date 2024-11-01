@@ -5,14 +5,16 @@ import numpy as np
 VITESSE_LUMIERE = 299792458
 RAYON_TERRE = 6367444.65712259
 
-def satellite_reader(name_file=None):
-    """This function converts the standard .csv from homework to actual values for calculations"""
+def satellite_reader(name_file=None, var=None):
+    """Cette fonction convertit les données .csv en un dictionnaire"""
+    if var is None:
+        var = []
     with open(name_file, newline='', encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile, delimiter=';')
         for row in reader:
             # Extraire les données des satellites
             if len(row) > 0 and row[0].isdigit():
-                satellite_data.append({
+                var.append({
                     'nb': int(row[0]),
                     't': float(row[1].replace(',', '.')),
                     't_prime': float(row[2].replace(',', '.')),
@@ -20,16 +22,14 @@ def satellite_reader(name_file=None):
                     'y': float(row[4].replace(',', '.')),
                     'z': float(row[5].replace(',', '.'))
                 })
-    return satellite_data
+    return var
 
-def np_satellite_reader(name_file=None):
-    with open(name_file, newline='', encoding='utf-8') as csvfile:
-        reader = csv.reader(csvfile, delimiter=';')
-
-        satellite_data = np.loadtxt(name_file, delimiter=";", skiprows=3)
-    return satellite_data
+def np_satellite_reader(name_file=None, ):
+    """Méthode avec numpy pour obtenir une matrice contenant les valeurs de """
+    pass #TODO - Do some kind of conversion from .csv to matrix
 
 def ordering(id_test):
+    """Crée un ordre pour calculer les angles"""
     listing = []
     for a in range(len(id_test)):
         for b in range(len(id_test)):
@@ -58,19 +58,57 @@ def np_calculate_angle(matrix, id):
     answer = degrees(acos(cos))
     return answer
 
-def calculate_coordinates_cart(order=None):
-    """Question 2 - Calculer, à partir de 5 satellites, les coordonnées cartésiens du point GPS"""
-    if order is None:
-        order = []
-    matrix = np.array([])
-    pass
+def np_calculate_matrix(order, number, data):
+    """Question 2 et 3 - Calculer, à partir de cinq satellites, la matrice du .csv contenant les réponses"""
+    if number != 5:
+        return quit("ERROR 2 - NOT 5 SATELLITES FOUND")
+    matrix = np.array([[data[order[0] - 1]["t"], data[order[0] - 1]["t_prime"],
+                       data[order[0] - 1]["x"], data[order[0] - 1]["y"], data[order[0] - 1]["z"]],
+                       [data[order[1] - 1]["t"], data[order[1] - 1]["t_prime"],
+                        data[order[1] - 1]["x"], data[order[1] - 1]["y"], data[order[1] - 1]["z"]],
+                       [data[order[2] - 1]["t"], data[order[2] - 1]["t_prime"],
+                        data[order[2] - 1]["x"], data[order[2] - 1]["y"], data[order[2] - 1]["z"]],
+                       [data[order[3] - 1]["t"], data[order[3] - 1]["t_prime"],
+                        data[order[3] - 1]["x"], data[order[3] - 1]["y"], data[order[3] - 1]["z"]],
+                       [data[order[4] - 1]["t"], data[order[4] - 1]["t_prime"],
+                        data[order[4] - 1]["x"], data[order[4] - 1]["y"], data[order[4] - 1]["z"]]])
 
-def calculate_desync(order=[]):
+    ans = np.array(
+            [[pow(VITESSE_LUMIERE, 2) * pow((matrix[0][1] - matrix[0][0]), 2)
+              - pow((matrix[0][2]), 2) - pow((matrix[0][3]), 2) - pow((matrix[0][4]), 2)],
+             [pow(VITESSE_LUMIERE, 2) * pow((matrix[1][1] - matrix[1][0]), 2)
+              - pow((matrix[1][2]), 2) - pow((matrix[1][3]), 2) - pow((matrix[1][4]), 2)],
+             [pow(VITESSE_LUMIERE, 2) * pow((matrix[2][1] - matrix[2][0]), 2)
+              - pow((matrix[2][2]), 2) - pow((matrix[2][3]), 2) - pow((matrix[2][4]), 2)],
+             [pow(VITESSE_LUMIERE, 2) * pow((matrix[3][1] - matrix[3][0]), 2)
+              - pow((matrix[3][2]), 2) - pow((matrix[3][3]), 2) - pow((matrix[3][4]), 2)],
+             [pow(VITESSE_LUMIERE, 2) * pow((matrix[4][1] - matrix[4][0]), 2)
+              - pow((matrix[4][2]), 2) - pow((matrix[4][3]), 2) - pow((matrix[4][4]), 2)]])
+
+    new_matrix = np.array(
+                [[-2 * matrix[0][2], -2 * matrix[0][3], -2 * matrix[0][4],
+                  2 * (pow(VITESSE_LUMIERE, 2) - (matrix[0][1] - matrix[0][0])), 1],
+                 [-2 * matrix[1][2], -2 * matrix[1][3], -2 * matrix[1][4],
+                  2 * (pow(VITESSE_LUMIERE, 2) - (matrix[1][1] - matrix[1][0])), 1],
+                 [-2 * matrix[2][2], -2 * matrix[2][3], -2 * matrix[2][4],
+                  2 * (pow(VITESSE_LUMIERE, 2) - (matrix[2][1] - matrix[2][0])), 1],
+                 [-2 * matrix[3][2], -2 * matrix[3][3], -2 * matrix[3][4],
+                  2 * (pow(VITESSE_LUMIERE, 2) - (matrix[3][1] - matrix[3][0])), 1],
+                 [-2 * matrix[4][2], -2 * matrix[4][3], -2 * matrix[4][4],
+                  2 * (pow(VITESSE_LUMIERE, 2) - (matrix[4][1] - matrix[4][0])), 1]])
+
+    if np.linalg.det(new_matrix) == 0:
+        return print(matrix)
+    ans_list = np.transpose(np.matmul(np.linalg.inv(new_matrix), ans))
+    return ans_list
+
+def calculate_desync(order):
     """Question 3 - Calculer le décalage de l'horloge récepteur des satellites"""
+    pass #TODO - Find, with the resulting matrice, where is the correct answer
 
-def calculate_coordinates_polar(order=[]):
+def calculate_coordinates_polar(order):
     """Question 4 - Calculer, à partir de 5 satellites, les coordonnées polaires du point GPS"""
-    pass
+    pass #TODO - With The XYZ Vector, find
 
 def googlemaps_finder(long, lat):
     """Question 5 - Utiliser le module googlemaps pour obtenir la description du lieu affiché"""
@@ -80,49 +118,29 @@ def satellite_cartesian(nb):
     pass
 
 if __name__ == "__main__":
-    satellite_data = []
+    sat_data = []
     sat_ID = []
     texte_q1 = f"{"-" * 30}Question 1{"-" * 30}\n Quel est l'angle entre chaque satellite ?"
     texte_q2 = f"{"-" * 30}Question 2{"-" * 30}\n Quel sont les coordonnés affiché par le satellite ?"
 
     file = str(input("What is the name of the .csv file (in the same directory as the script) \n"
                     "(Example : '28_Data') : ") + ".csv")
-    module = int(input("Do you wanna use the vanilla calculator (0) or the experimental one (1) : "))
 
-    if module != 0 and module != 1:
-        quit("ERROR 1 - WRONG MODULE SELECTED")
-    elif module == 0:
-        satellite_data = satellite_reader(file)
-        print(texte_q1.center(90))
-        nb_sat = int(input("How many satellites do you wanna consider on your project : "))
-        for i in range(nb_sat):
-            sat_temp = int(input(f"What is the ID of the satellite nb. {i+1} : "))
-            sat_ID.append(sat_temp)
-        order = ordering(sat_ID)
-        for i in range(len(sat_ID)):
-            for j in range(len(sat_ID)):
-                if i < j:
-                    first = [satellite_data[i]["x"], satellite_data[i]["y"], satellite_data[i]["z"]]
-                    #first = [satellite_data[2, i], satellite_data[3, i], satellite_data[4, i]]
-                    second = [satellite_data[j]["x"], satellite_data[j]["y"], satellite_data[j]["z"]]
-                    #second = [satellite_data[2, j], satellite_data[3, j], satellite_data[4, j]]
-                    rep = calculate_angle(first, second)
-                    print("-" * 60)
-                    print(f"| L'angle entre le satellite {i + 1} et le satellite {j + 1} est : "
-                          f"{round(rep, 6) if rep > 15 else "Trop petit"} |")
+    satellite_reader(file, sat_data)
+    print(texte_q1.center(90))
+    nb_sat = int(input("How many satellites do you wanna consider on your project (recommandé - 5) : "))
+    for i in range(nb_sat):
+        sat_temp = int(input(f"What is the ID of the satellite nb. {i+1} : "))
+        sat_ID.append(sat_temp)
+    new_order = ordering(sat_ID)
+    for i in range(len(new_order)):
+             first = [sat_data[new_order[i][0] - 1]["x"], sat_data[new_order[i][0] - 1]["y"], sat_data[new_order[i][0] - 1]["z"]]
+             second = [sat_data[new_order[i][1] - 1]["x"], sat_data[new_order[i][1] - 1]["y"], sat_data[new_order[i][1] - 1]["z"]]
+             rep = calculate_angle(first, second)
+             print("-" * 60)
+             print(f"| L'angle entre le satellite {new_order[i][0]} et le satellite {new_order[i][1]} est : "
+                   f"{round(rep, 6) if rep > 15 else "Trop petit"} |")
+    print(texte_q2.center(90))
+    print(np_calculate_matrix(sat_ID, nb_sat, sat_data))
+    print(calculate_desync.__doc__.center(90))
 
-    else:
-        satellite_data = np_satellite_reader(file)
-        print(texte_q1.center(90))
-        nb_sat = int(input("How many satellites do you wanna consider on your project : "))
-        for i in range(nb_sat):
-            sat_temp = int(input(f"What is the ID of the satellite nb. {i + 1} : "))
-            sat_ID.append(sat_temp)
-        order = ordering(sat_ID)
-        for i in range(len(sat_ID)):
-            for j in range(len(sat_ID)):
-                if i < j:
-                    rep = calculate_angle(satellite_data, order)
-                    print("-" * 60)
-                    print(f"| L'angle entre le satellite {i + 1} et le satellite {j + 1} est : "
-                          f"{round(rep, 6) if rep > 15 else "Trop petit"} |")
