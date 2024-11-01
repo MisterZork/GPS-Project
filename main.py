@@ -1,6 +1,9 @@
 import csv
 from math import sqrt, acos, asin, degrees
 import numpy as np
+import googlemaps
+#from dotenv import load_dotenv
+#import os
 
 VITESSE_LUMIERE = 299792458
 RAYON_TERRE = 6367444.65712259
@@ -104,14 +107,24 @@ def calculate_coordinates_polar(coords):
     h = p - RAYON_TERRE
     return [lat, long, h]
 
-def googlemaps_finder(long, lat):
+def googlemaps_finder(longlat):
     """Question 5 - Utiliser le module googlemaps pour obtenir la description du lieu affiché"""
+    # gmaps = googlemaps.Client(key="")
+    gmaps = googlemaps.Client(key="INSERT-API-KEY")
+    lat = longlat[0]
+    long = longlat[1]
+    adress = gmaps.reverse_geocode((lat,long))
+
+    return (adress[0]['formatted_address'])
 
 def satellite_cartesian(nb):
     """Question 6 - Permet d'avoir la hauteur d'un des satellites sélectionné"""
     pass
 
 if __name__ == "__main__":
+    #load_dotenv()
+    #API-KEY = os.getenv('API-KEY')
+
     sat_data = []
     sat_ID = []
     texte_q1 = f"{"-" * 30}Question 1{"-" * 30}\n Quel est l'angle entre chaque satellite ?"
@@ -143,3 +156,4 @@ if __name__ == "__main__":
     print(f"Le décalage horloge du GPS est : {np.round(excel_list[0][3], 4)} secondes")
     print(texte_q4.center(90))
     print(calculate_coordinates_polar(excel_list))
+    print(googlemaps_finder(calculate_coordinates_polar(excel_list)))
