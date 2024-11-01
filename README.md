@@ -6,7 +6,7 @@ the satellites and more incoming.
 The objectives of this project is to automate the task given by our teacher to do mass calculation to find and answer
 the correct angle between satellites, their own coordinates, the GPS Coordinates and more.
 
-### Hot to use : 
+### How to use : 
 1. Run main.py
 2. Read the instruction on screen
 3. Enjoy!
