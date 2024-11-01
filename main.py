@@ -23,8 +23,11 @@ def satellite_reader(name_file=None):
     return satellite_data
 
 def np_satellite_reader(name_file=None):
-    satellites = np.loadtxt(name_file, delimiter=";", skiprows=3)
-    return satellites
+    with open(name_file, newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';')
+
+        satellite_data = np.loadtxt(name_file, delimiter=";", skiprows=3)
+    return satellite_data
 
 def ordering(id_test):
     listing = []
@@ -84,10 +87,12 @@ if __name__ == "__main__":
 
     file = str(input("What is the name of the .csv file (in the same directory as the script) \n"
                     "(Example : '28_Data') : ") + ".csv")
-    module = bool(input("Do you wanna use the vanilla calculator (0) or the experimental one (1) :"))
+    module = int(input("Do you wanna use the vanilla calculator (0) or the experimental one (1) : "))
 
-    if module is False:
-        satellite_reader(file)
+    if module != 0 and module != 1:
+        quit("ERROR 1 - WRONG MODULE SELECTED")
+    elif module == 0:
+        satellite_data = satellite_reader(file)
         print(texte_q1.center(90))
         nb_sat = int(input("How many satellites do you wanna consider on your project : "))
         for i in range(nb_sat):
@@ -107,10 +112,17 @@ if __name__ == "__main__":
                           f"{round(rep, 6) if rep > 15 else "Trop petit"} |")
 
     else:
-        np_satellite_reader(file)
+        satellite_data = np_satellite_reader(file)
         print(texte_q1.center(90))
         nb_sat = int(input("How many satellites do you wanna consider on your project : "))
         for i in range(nb_sat):
             sat_temp = int(input(f"What is the ID of the satellite nb. {i + 1} : "))
             sat_ID.append(sat_temp)
         order = ordering(sat_ID)
+        for i in range(len(sat_ID)):
+            for j in range(len(sat_ID)):
+                if i < j:
+                    rep = calculate_angle(satellite_data, order)
+                    print("-" * 60)
+                    print(f"| L'angle entre le satellite {i + 1} et le satellite {j + 1} est : "
+                          f"{round(rep, 6) if rep > 15 else "Trop petit"} |")
