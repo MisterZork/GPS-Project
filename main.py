@@ -2,20 +2,21 @@ import csv
 from math import sqrt, acos, asin, degrees
 import numpy as np
 import googlemaps
-#from dotenv import load_dotenv
-#import os
+from dotenv import load_dotenv
+import os
 
 VITESSE_LUMIERE = 299792458
 RAYON_TERRE = 6367444.65712259
 
 def satellite_reader(name_file=None, var=None):
-    """Cette fonction convertit les données .csv en un dictionnaire"""
+    """
+    Cette fonction convertit les données .csv en un dictionnaire.
+    """
     if var is None:
         var = []
     with open(name_file, newline='', encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile, delimiter=';')
         for row in reader:
-            # Extraire les données des satellites
             if len(row) > 0 and row[0].isdigit():
                 var.append({
                     'nb': int(row[0]),
@@ -27,23 +28,23 @@ def satellite_reader(name_file=None, var=None):
                 })
     return var
 
-def np_satellite_reader(name_file=None, ):
-    """Méthode avec numpy pour obtenir une matrice contenant les valeurs de """
-    pass #TODO - Do some kind of conversion from .csv to matrix
-
 def ordering(id_test):
-    """Crée un ordre pour calculer les angles"""
+    """
+    Cette fonction permet de trouver toutes les combinaisons possibles sans répétition
+    (s'il n'y a pas de mêmes valeurs dans la liste).
+    """
     listing = []
     for a in range(len(id_test)):
         for b in range(len(id_test)):
-            # print(f' test  {i}: {sat_ID[i]}')
             order_temp = [id_test[a], id_test[b]]
             if a < b:
                 listing.append(order_temp)
     return listing
 
 def calculate_angle(ang1, ang2):
-    """Question 1 - Calculer l'angle entre deux satellites"""
+    """
+    Cette fonction permet de calculer l'angle entre deux coordonnées de satellites.
+    """
     product = float(ang1[0]*ang2[0] + ang1[1]*ang2[1] + ang1[2]*ang2[2])
     module_product = float(sqrt(pow(ang1[0], 2)  + pow(ang1[1], 2) + pow(ang1[2], 2))
                            * sqrt(pow(ang2[0], 2) + pow(ang2[1], 2) + pow(ang2[2], 2)))
@@ -51,10 +52,11 @@ def calculate_angle(ang1, ang2):
     answer = degrees(acos(cos))
     return answer
 
-def np_calculate_matrix(order, number, data):
-    """Question 2 et 3 - Calculer, à partir de cinq satellites, la matrice du .csv contenant les réponses"""
-    if number != 5:
-        return quit("ERROR 2 - NOT 5 SATELLITES FOUND")
+def np_calculate_matrix(order, data):
+    """
+    Cette question permet de trouver les coordonnées X, Y et Z, ainsi que le décalage horaire D
+    à l'aide du dictionnaire obtenue dans le .csv et en créant une matrice avec.
+    """
     matrix = np.array([[data[order[0] - 1]["t"], data[order[0] - 1]["t_prime"],
                        data[order[0] - 1]["x"], data[order[0] - 1]["y"], data[order[0] - 1]["z"]],
                        [data[order[1] - 1]["t"], data[order[1] - 1]["t_prime"],
@@ -96,7 +98,10 @@ def np_calculate_matrix(order, number, data):
     return ans_list
 
 def calculate_coordinates_polar(coords):
-    """Question 4 - Calculer, à partir de 5 satellites, les coordonnées polaires du point GPS"""
+    """
+    Cette fonction calcule la latitude, longitude et la hauteur du point GPS
+    à l'aide des coordonnées X, Y et Z obtenus précedement.
+    """
     x, y, z = coords[0][0], coords[0][1], coords[0][2]
     p = sqrt((x**2) + (y**2) + (z**2))
     lat = degrees(asin(z / p))
@@ -107,39 +112,36 @@ def calculate_coordinates_polar(coords):
     h = p - RAYON_TERRE
     return [lat, long, h]
 
-def googlemaps_finder(longlat):
-    """Question 5 - Utiliser le module googlemaps pour obtenir la description du lieu affiché"""
-    # gmaps = googlemaps.Client(key="")
-    gmaps = googlemaps.Client(key="INSERT-API-KEY")
-    lat = longlat[0]
-    long = longlat[1]
-    adress = gmaps.reverse_geocode((lat,long))
-
-    return (adress[0]['formatted_address'])
-
-def satellite_cartesian(nb):
-    """Question 6 - Permet d'avoir la hauteur d'un des satellites sélectionné"""
-    pass
+def googlemaps_finder(long_lat, api):
+    """
+    Cette fonction utilise les clés API de Google pour afficher les informations liés aux coordonnées obtenus.
+    """
+    gmaps = googlemaps.Client(key=api)
+    lat = long_lat[0]
+    long = long_lat[1]
+    address = gmaps.reverse_geocode((lat,long))
+    return address[0]['formatted_address']
 
 if __name__ == "__main__":
-    #load_dotenv()
-    #API-KEY = os.getenv('API-KEY')
-
+    load_dotenv()
+    api_key = os.getenv('API-KEY')
     sat_data = []
     sat_ID = []
     texte_q1 = f"{"-" * 30}Question 1{"-" * 30}\n Quel est l'angle entre chaque satellite ?"
     texte_q2 = f"{"-" * 30}Question 2{"-" * 30}\n Quels sont les coordonnés affiché par le satellite ?"
     texte_q3 = f"{"-" * 30}Question 3{"-" * 30}\n Quel est le décalage horloge du GPS ?"
     texte_q4 = f"{"-" * 30}Question 4{"-" * 30}\n Quels sont les coordonnées polaires du GPS ?"
+    texte_q5 = f"{"-" * 30}Question 5{"-" * 30}\n Où est-ce que se trouve ce GPS ?"
+    texte_q6 = f"{"-" * 30}Question 6{"-" * 30}\n Quel est l'altitude du premier satellite ? "
 
-    file = str(input("What is the name of the .csv file (in the same directory as the script) \n"
+    file = str(input("Quel est le nom du fichier .csv dont tu veux prendre les données satellites ? \n"
                     "(Example : '28_Data') : ") + ".csv")
-
     satellite_reader(file, sat_data)
+
     print(texte_q1.center(90))
-    nb_sat = int(input("How many satellites do you wanna consider on your project (recommandé - 5) : "))
+    nb_sat = int(input("Combien de satellite veux-tu calculer ? (recommandé - 5) \n-> "))
     for i in range(nb_sat):
-        sat_temp = int(input(f"What is the ID of the satellite nb. {i+1} : "))
+        sat_temp = int(input(f"C'est quoi l'identifiant du satellite nb. {i+1} : "))
         sat_ID.append(sat_temp)
     new_order = ordering(sat_ID)
     for i in range(len(new_order)):
@@ -149,11 +151,20 @@ if __name__ == "__main__":
              print("-" * 60)
              print(f"| L'angle entre le satellite {new_order[i][0]} et le satellite {new_order[i][1]} est : "
                    f"{round(rep, 6) if rep > 15 else "Trop petit"} |")
+
     print(texte_q2.center(90))
-    excel_list = np_calculate_matrix(sat_ID, nb_sat, sat_data)
-    print(f"Les coordonnées X, Y et Z où se trouve le GPS sont : {np.round(excel_list[0][0:3], 0)} (en mètres)")
+    if nb_sat == 5:
+        excel_list = np_calculate_matrix(sat_ID, sat_data)
+        print(f"Les coordonnées X, Y et Z où se trouve le GPS sont :"
+              f"{np.round(excel_list[0][0:3], 0)} (en mètres)")
+    else:
+        quit("ERROR 3 - NOT EXACTLY 5 SATELLITES")
+
     print(texte_q3.center(90))
     print(f"Le décalage horloge du GPS est : {np.round(excel_list[0][3], 4)} secondes")
+
     print(texte_q4.center(90))
     print(calculate_coordinates_polar(excel_list))
-    print(googlemaps_finder(calculate_coordinates_polar(excel_list)))
+
+    print(texte_q5.center(90))
+    print(googlemaps_finder(calculate_coordinates_polar(excel_list), api_key))
