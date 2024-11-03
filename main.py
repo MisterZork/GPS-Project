@@ -103,7 +103,7 @@ def calculate_coordinates_polar(coords):
     à l'aide des coordonnées X, Y et Z obtenus précedement.
     """
     x, y, z = coords[0][0], coords[0][1], coords[0][2]
-    p = sqrt((x**2) + (y**2) + (z**2))
+    p = sqrt(x**2 + y**2 + z**2)
     lat = degrees(asin(z / p))
     if y >= 0:
         long = degrees(acos(x / sqrt(x**2 + y**2)))
@@ -114,17 +114,27 @@ def calculate_coordinates_polar(coords):
 
 def googlemaps_finder(long_lat, api):
     """
-    Cette fonction utilise les clés API de Google pour afficher les informations liés aux coordonnées obtenus.
+    Cette fonction utilise la clé API de Google pour afficher les informations liés aux coordonnées obtenus.
     """
     gmaps = googlemaps.Client(key=api)
-    lat = long_lat[0]
-    long = long_lat[1]
-    address = gmaps.reverse_geocode((lat,long))
-    return address[0]['formatted_address']
+    try:
+        lat = long_lat[0]
+        long = long_lat[1]
+        address = gmaps.reverse_geocode((lat, long))
+        return address[0]['formatted_address']
+    except ValueError:
+        return None
+
+def sat_height(order, sat_info):
+    """
+    Cette fonction permet de trouver l'altitude du satellite.
+    """
+    x, y, z = sat_info[order[0] - 1]["x"], sat_info[order[0] - 1]["y"], sat_info[order[0] - 1]["z"]
+    return sqrt(x**2 + y**2 + z**2) - RAYON_TERRE
 
 if __name__ == "__main__":
     load_dotenv()
-    api_key = os.getenv('API-KEY')
+    api_key = os.getenv("API_KEY")
     sat_data = []
     sat_ID = []
     texte_q1 = f"{"-" * 30}Question 1{"-" * 30}\n Quel est l'angle entre chaque satellite ?"
@@ -154,17 +164,30 @@ if __name__ == "__main__":
 
     print(texte_q2.center(90))
     if nb_sat == 5:
-        excel_list = np_calculate_matrix(sat_ID, sat_data)
-        print(f"Les coordonnées X, Y et Z où se trouve le GPS sont :"
-              f"{np.round(excel_list[0][0:3], 0)} (en mètres)")
+        polar_list = np_calculate_matrix(sat_ID, sat_data)
+        print(f"Les coordonnées X, Y et Z où se trouve le GPS sont : {int(polar_list[0][0])}m, "
+              f"{int(polar_list[0][1])}m, {int(polar_list[0][2])}m")
     else:
         quit("ERROR 3 - NOT EXACTLY 5 SATELLITES")
 
     print(texte_q3.center(90))
-    print(f"Le décalage horloge du GPS est : {np.round(excel_list[0][3], 4)} secondes")
+    print(f"Le décalage horloge du GPS est : {np.round(polar_list[0][3], 4)} secondes")
 
     print(texte_q4.center(90))
-    print(calculate_coordinates_polar(excel_list))
+    lat = calculate_coordinates_polar(polar_list)[0]
+    long = calculate_coordinates_polar(polar_list)[1]
+    hauteur = calculate_coordinates_polar(polar_list)[2]
+    print(f"Les coordonnées polaires du GPS sont : {round(lat, 6)}°, {round(long, 6)}°, {int(hauteur)} mètres")
 
     print(texte_q5.center(90))
-    print(googlemaps_finder(calculate_coordinates_polar(excel_list), api_key))
+    if api_key is None:
+        print("ERROR 12 - NO API KEY FOUND")
+    else:
+        print(googlemaps_finder(calculate_coordinates_polar(polar_list), api_key))
+
+    print(texte_q6.center(90))
+    sat = int(input("Quel satellite veux-tu trouver l'altitude ? \n-> "))
+    if sat != sat_ID[0]:
+        sat_ID[0] = sat
+    print(f"L'altitude du satellite {sat} est : {int(sat_height(sat_ID, sat_data))} mètres")
+    print(f"En termes de r, l'altitude est : {round(((sat_height(sat_ID, sat_data)) / (RAYON_TERRE)), 2)}r")
