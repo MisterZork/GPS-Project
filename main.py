@@ -2,8 +2,6 @@ import csv
 from math import sqrt, acos, asin, degrees
 import numpy as np
 import googlemaps
-from dotenv import load_dotenv
-import os
 
 VITESSE_LUMIERE = 299792458
 RAYON_TERRE = 6367444.65712259
@@ -133,8 +131,7 @@ def sat_height(order, sat_info):
     return sqrt(x**2 + y**2 + z**2) - RAYON_TERRE
 
 if __name__ == "__main__":
-    load_dotenv()
-    api_key = os.getenv("API_KEY")
+    api_key = None
     sat_data = []
     sat_ID = []
     texte_q1 = f"{"-" * 30}Question 1{"-" * 30}\n Quel est l'angle entre chaque satellite ?"
@@ -160,7 +157,7 @@ if __name__ == "__main__":
              rep = calculate_angle(first, second)
              print("-" * 71)
              print(f"| L'angle entre le satellite {new_order[i][0]} et le satellite {new_order[i][1]} est : "
-                   f"{round(rep, 6) if rep > 15 else "Trop petit"} |")
+                   f"{round(rep, 6) if rep > 15 else "Trop petit"}° |")
 
     print(texte_q2.center(90))
     if nb_sat == 5:
@@ -189,7 +186,7 @@ if __name__ == "__main__":
     i = 0
     while i == 0:
         print(f"L'altitude du satellite {sat_ID[0]} est : {int(sat_height(sat_ID, sat_data))} mètres")
-        print(f"En termes de r, l'altitude est : {round(((sat_height(sat_ID, sat_data)) / (RAYON_TERRE)), 2)}r")
+        print(f"En termes de r, l'altitude est : {round(((sat_height(sat_ID, sat_data)) / RAYON_TERRE), 2)}r")
         print("-" * 71)
         confirm = str(input("Est-ce que ce satellite est le bon ? (O/N):"))
         if confirm.lower() == "o":

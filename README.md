@@ -7,7 +7,9 @@ The objectives of this project is to automate the task given by our teacher to d
 the correct angle between satellites, their own coordinates, the GPS Coordinates and more.
 
 ### How to use : 
-1. Run main.py
-2. Read the instruction on screen
-3. Enjoy!
-<img src="https://cdn.iconscout.com/icon/free/png-512/free-molecule-icon-download-in-svg-png-gif-file-formats--electron-atom-chemistry-science-pack-technology-icons-1798583.png?f=webp&amp;amp;w=256"/>
+1. Install Python (3.0 and above).
+2. Installing modules on requirements.txt with "pip install requirements.txt".
+3. Put your .csv data inside the folder.
+4. (Optional) Install the API key for Google Maps
+5. Read the instruction on screen.
+6. Enjoy!
