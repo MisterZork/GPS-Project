@@ -106,9 +106,9 @@ def calculate_coordinates_polar(coords):
     p = sqrt(x**2 + y**2 + z**2)
     lat = degrees(asin(z / p))
     if y >= 0:
-        long = degrees(acos(x / sqrt(x**2 + y**2)))
+        long = degrees(acos(x/sqrt(x**2 + y**2)))
     else:
-        long = degrees(-acos(x / sqrt(x**2 + y**2)))
+        long = degrees(-acos(x/sqrt(x**2 + y**2)))
     h = p - RAYON_TERRE
     return [lat, long, h]
 
@@ -165,8 +165,8 @@ if __name__ == "__main__":
     print(texte_q2.center(90))
     if nb_sat == 5:
         polar_list = np_calculate_matrix(sat_ID, sat_data)
-        print(f"Les coordonnées X, Y et Z où se trouve le GPS sont : {int(polar_list[0][0])}m, "
-              f"{int(polar_list[0][1])}m, {int(polar_list[0][2])}m")
+        print(f"Les coordonnées X, Y et Z où se trouve le GPS sont : {int(polar_list[0][0])} m, "
+              f"{int(polar_list[0][1])} m, {int(polar_list[0][2])} m")
     else:
         quit("ERROR 3 - NOT EXACTLY 5 SATELLITES")
 
@@ -186,8 +186,13 @@ if __name__ == "__main__":
         print(googlemaps_finder(calculate_coordinates_polar(polar_list), api_key))
 
     print(texte_q6.center(90))
-    sat = int(input("Quel satellite veux-tu trouver l'altitude ? \n-> "))
-    if sat != sat_ID[0]:
-        sat_ID[0] = sat
-    print(f"L'altitude du satellite {sat} est : {int(sat_height(sat_ID, sat_data))} mètres")
-    print(f"En termes de r, l'altitude est : {round(((sat_height(sat_ID, sat_data)) / (RAYON_TERRE)), 2)}r")
+    i = 0
+    while i == 0:
+        print(f"L'altitude du satellite {sat_ID[0]} est : {int(sat_height(sat_ID, sat_data))} mètres")
+        print(f"En termes de r, l'altitude est : {round(((sat_height(sat_ID, sat_data)) / (RAYON_TERRE)), 2)}r")
+        confirm = str(input("Est-ce que ce satellite est le bon ? (O/N):"))
+        if confirm.lower() == "o":
+            i += 1
+        else:
+            sat = int(input("Quel satellite veux-tu trouver l'altitude ? \n-> "))
+            sat_ID[0] = sat
